@@ -1,1 +1,5 @@
+__pycache__/
+assets/
+cache/
 data/
+intermediary_data/
