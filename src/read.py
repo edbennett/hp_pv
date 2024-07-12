@@ -7,6 +7,7 @@ from flow_analysis.readers import readers
 from joblib import Memory
 import mpmath
 import numpy as np
+import pyerrors as pe
 
 from utils import partial_corr_mult
 
@@ -87,3 +88,29 @@ def get_all_flows(filenames, reader="hp", operator="sym", extra_metadata=None):
 
         result.append(datum)
     return result
+
+
+def recurse_gamma(obj):
+    if isinstance(obj, dict):
+        recurse_gamma(obj.values())
+        return
+    if isinstance(obj, str):
+        raise TypeError("Can't recurse into a string.")
+    try:
+        for value in obj:
+            recurse_gamma(value)
+    except TypeError:
+        obj.gamma_method()
+
+
+def read_fit_result(filename):
+    data = pe.input.json.load_json_dict(filename, verbose=False, full_output=True)
+    data["filename"] = filename
+    recurse_gamma(data["obsdata"])
+    data.update(data.pop("description"))
+    data.update(data.pop("obsdata"))
+    return data
+
+
+def read_all_fit_results(filenames):
+    return [read_fit_result(filename) for filename in filenames]

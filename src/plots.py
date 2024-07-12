@@ -1,6 +1,24 @@
 #!/usr/bin/env python3
 
+import matplotlib.pyplot as plt
 import pyerrors as pe
+
+
+class ColourRegistry:
+    def __init__(self, colours=None):
+        if colours:
+            self._colours = colours
+        else:
+            prop_cycle = plt.rcParams["axes.prop_cycle"]
+            self._colours = prop_cycle.by_key()["color"]
+
+        self._colour_dict = {}
+
+    def __getitem__(self, key):
+        if key not in self._colour_dict:
+            self._colour_dict[key] = self._colours.pop(0)
+
+        return self._colour_dict[key]
 
 
 def errorbar_pyerrors(ax, x, y, *args, **kwargs):

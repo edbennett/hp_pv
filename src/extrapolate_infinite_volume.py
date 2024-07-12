@@ -4,6 +4,7 @@ import argparse
 
 import pyerrors as pe
 
+from provenance import get_consistent_metadata
 from read import get_all_flows
 from stats import weighted_mean
 from utils import zip_combinations
@@ -18,16 +19,6 @@ def get_args():
     parser.add_argument("--output_filename", default=None)
     parser.add_argument("--time", required=True, type=float)
     return parser.parse_args()
-
-
-def get_consistent_metadata(flows, key):
-    values = set(flow[key] for flow in flows)
-    if len(values) > 1:
-        raise ValueError(
-            f"Different {key} values {values} cannot be combined in one fit."
-        )
-
-    return values.pop() if values else None
 
 
 def get_scales_at_time(flows, scale, time):

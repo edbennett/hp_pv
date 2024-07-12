@@ -7,8 +7,8 @@ import numpy as np
 import pyerrors as pe
 
 from extrapolate_infinite_volume import get_scales_at_time, linear_fit
-from plots import errorbar_pyerrors
-from read import get_all_flows
+from plots import ColourRegistry, errorbar_pyerrors
+from read import get_all_flows, read_all_fit_results
 
 
 def get_args():
@@ -20,31 +20,6 @@ def get_args():
     return parser.parse_args()
 
 
-def recurse_gamma(obj):
-    if isinstance(obj, dict):
-        recurse_gamma(obj.values())
-        return
-    if isinstance(obj, str):
-        raise TypeError("Can't recurse into a string.")
-    try:
-        for value in obj:
-            recurse_gamma(value)
-    except TypeError:
-        obj.gamma_method()
-
-
-def read_fit_result(filename):
-    data = pe.input.json.load_json_dict(filename, verbose=False, full_output=True)
-    recurse_gamma(data["obsdata"])
-    data.update(data.pop("description"))
-    data.update(data.pop("obsdata"))
-    return data
-
-
-def read_all_fit_results(filenames):
-    return [read_fit_result(filename) for filename in filenames]
-
-
 def plot_fit(ax, fit_result, xmax, colour=None):
     scan_x = np.linspace(0, xmax, 1000)
     scan_y = linear_fit(np.asarray(fit_result, dtype=float), scan_x)
@@ -53,23 +28,6 @@ def plot_fit(ax, fit_result, xmax, colour=None):
     ax.fill_between(
         scan_x, scan_y + scan_errors, scan_y - scan_errors, color=colour, alpha=0.2
     )
-
-
-class ColourRegistry:
-    def __init__(self, colours=None):
-        if colours:
-            self._colours = colours
-        else:
-            prop_cycle = plt.rcParams["axes.prop_cycle"]
-            self._colours = prop_cycle.by_key()["color"]
-
-        self._colour_dict = {}
-
-    def __getitem__(self, key):
-        if key not in self._colour_dict:
-            self._colour_dict[key] = self._colours.pop(0)
-
-        return self._colour_dict[key]
 
 
 def add_finite_L(ax_row, fit_result, colours):
