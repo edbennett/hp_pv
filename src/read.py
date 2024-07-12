@@ -28,8 +28,8 @@ def normalize_coupling(corr, times, Nc, L):
     # theta is the Jacobi theta function, not the Jacobi elliptic function
     delta_plus_one = [
         (
-            -64 * time ** 2 * mpmath.pi ** 2 / (3 * L ** 4)
-            + mpmath.jtheta(3, 0, mpmath.exp(-L ** 2 / (8 * time))) ** 4
+            -64 * time**2 * mpmath.pi**2 / (3 * L**4)
+            + mpmath.jtheta(3, 0, mpmath.exp(-(L**2) / (8 * time))) ** 4
         )
         for time in times
     ]
@@ -37,8 +37,7 @@ def normalize_coupling(corr, times, Nc, L):
     # Rearrangement of arXiv:1208.1051 Eq. (1.2)
     # (to give arXiv:2402.18038 Eqs. (2) and (4))
     coefficient = [
-        128 * mpmath.pi ** 2 / (element * 3 * (Nc ** 2 - 1))
-        for element in delta_plus_one
+        128 * mpmath.pi**2 / (element * 3 * (Nc**2 - 1)) for element in delta_plus_one
     ]
 
     return partial_corr_mult(np.asarray(coefficient, float), corr)
@@ -74,10 +73,14 @@ def get_all_flows(filenames, reader="hp", operator="sym", extra_metadata=None):
             **flows.metadata,
             "filename": flows.filename,
             "h": flows.h,
-            "t2E": flows.times ** 2 * flows.get_Es_pyerrors(operator=operator),
+            "t2E": flows.times**2 * flows.get_Es_pyerrors(operator=operator),
         }
-        datum["gGF^2"] = normalize_coupling(datum["t2E"], flows.times, datum["Nc"], datum["NX"])
-        datum["betaGF"] = -t_times_d_dt(datum["gGF^2"], flows.times, flows.h, variant="improved")
+        datum["gGF^2"] = normalize_coupling(
+            datum["t2E"], flows.times, datum["Nc"], datum["NX"]
+        )
+        datum["betaGF"] = -t_times_d_dt(
+            datum["gGF^2"], flows.times, flows.h, variant="improved"
+        )
 
         for key in "t2E", "gGF^2", "betaGF":
             datum[key].gamma_method()

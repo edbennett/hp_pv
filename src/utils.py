@@ -2,6 +2,7 @@
 
 import argparse
 import itertools
+import logging
 
 import numpy as np
 import pyerrors as pe
@@ -30,11 +31,12 @@ def get_non_none_indices(iterable):
 
 def partial_corr_mult(array, partial_corr):
     start_index, end_index = get_non_none_indices(partial_corr.content)
-    W_middle = (array[start_index:end_index] * np.asarray(partial_corr.content[start_index:end_index]).T).T
+    W_middle = (
+        array[start_index:end_index]
+        * np.asarray(partial_corr.content[start_index:end_index]).T
+    ).T
     return pe.Corr(
-        [None] * start_index
-        + list(W_middle)
-        + [None] * (len(array) - end_index)
+        [None] * start_index + list(W_middle) + [None] * (len(array) - end_index)
     )
 
 
@@ -46,10 +48,7 @@ def zip_combinations(*lists, min_count=1):
     valid_indices = list(range(0, max_count))
     for count in range(min_count, max_count + 1):
         for selected_indices in itertools.combinations(valid_indices, count):
-            yield [
-                [list_[index] for index in selected_indices]
-                for list_ in lists
-            ]
+            yield [[list_[index] for index in selected_indices] for list_ in lists]
 
 
 class SplitArgs(argparse.Action):

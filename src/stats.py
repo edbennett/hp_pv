@@ -2,6 +2,7 @@
 
 import numpy as np
 
+
 def weighted_mean(results):
     values = np.asarray([result.fit_parameters for result, aic in results])
     weights = np.asarray([np.exp(-aic) for result, aic in results])
