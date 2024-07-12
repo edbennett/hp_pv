@@ -47,30 +47,6 @@ def read_all_fit_results(filenames):
     return [read_fit_result(filename) for filename in filenames]
 
 
-def plot_bare_flows(flows):
-    fig, ax = plt.subplots(layout="constrained", figsize=(3.5, 3))
-
-    sizes = sorted(set(flow["NX"] for flow in flows))
-    markers = "oXsDv^"
-
-    for size, marker in zip(sizes, markers):
-        betas, test_t2E, test_t2E_error, test_W, test_W_error = [], [], [], [], []
-        for flow in flows:
-            if flow["NX"] != size:
-                continue
-            betas.append(flow["beta"])
-            test_t2E.append(flow["t2E"][flow["t2E"].T // 2].value)
-            test_t2E_error.append(flow["t2E"][flow["t2E"].T // 2].dvalue)
-
-        ax.errorbar(betas, test_t2E, yerr=test_t2E_error, ls="none", marker=marker)
-
-    ax.set_xlabel(r"$\beta$")
-    ax.set_ylabel(r"$\langle t^2 E\rangle$")
-    fig.legend(loc="outside upper center", ncols=5)
-
-    plt.show()
-
-
 def plot_fit(ax, fit_result, xmax, colour=None):
     scan_x = np.linspace(0, xmax, 1000)
     scan_y = linear_fit(np.asarray(fit_result, dtype=float), scan_x)
