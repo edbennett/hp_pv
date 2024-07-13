@@ -1,0 +1,82 @@
+plot_styles = "styles/paperdraft.mplstyle"
+
+lattice_sizes = [24, 28, 32, 36, 40]
+beta_slugs = ["920", "940", "960", "980", "100", "102", "104", "108", "110", "114", "120", "128", "136", "146"]
+operators = ["plaq", "sym"]
+
+interpolate_fit_order = 4
+
+
+rule all:
+    input:
+        volume_extrapolations=expand(
+            "assets/plots/volume_extrapolation_{operator}.pdf",
+            operator=operators,
+        ),
+        beta_interpolations=expand(
+            "assets/plots/beta_interpolation_finite_a_{operator}.pdf",
+            operator=operators,
+        )
+
+
+rule extrapolate_infinite_volume:
+    input:
+        data=expand("data/l{NX}t{NX}b{{beta_slug}}.txt", NX=lattice_sizes),
+        script="src/extrapolate_infinite_volume.py",
+    output:
+        "intermediary_data/infinite_volume_b{beta_slug}_t{time}_{operator}.json.gz",
+    conda:
+        "envs/hp.yml"
+    shell:
+        "python {input.script} {input.data} --output_filename {output} --operator {wildcards.operator} --time {wildcards.time}"
+
+
+volume_plot_beta_slugs = ["960", "980", "102"]
+volume_plot_times = [2.5, 3.5, 4.5, 6.0]
+
+rule plot_volume_extrapolation:
+    input:
+        data=expand(
+            "intermediary_data/infinite_volume_b{beta_slug}_t{time}_{{operator}}.json.gz",
+            beta_slug=volume_plot_beta_slugs,
+            time=volume_plot_times,
+        ),
+        script="src/plot_infinite_volume_extrapolation.py",
+    output:
+        "assets/plots/volume_extrapolation_{operator}.pdf",
+    conda:
+        "envs/hp.yml"
+    shell:
+        "python {input.script} {input.data} --output_filename {output} --plot_styles {plot_styles}"
+
+
+rule interpolate_finite_a:
+    input:
+        data=expand(
+            "intermediary_data/infinite_volume_b{beta_slug}_t{{time}}_{{operator}}.json.gz",
+            beta_slug=beta_slugs,
+        ),
+        script="src/fit_beta_against_g2.py",
+    output:
+        "intermediary_data/beta_interpolation_t{time}_{operator}.json.gz",
+    conda:
+        "envs/hp.yml"
+    shell:
+        "python {input.script} {input.data} --order {interpolate_fit_order} --output_filename {output}"
+
+
+finite_a_plot_times = volume_plot_times
+
+rule plot_finite_a_interpolation:
+    input:
+        data=expand(
+            "intermediary_data/beta_interpolation_t{time}_{{operator}}.json.gz",
+            time=finite_a_plot_times,
+        ),
+        script="src/plot_beta_against_g2.py",
+    output:
+        "assets/plots/beta_interpolation_finite_a_{operator}.pdf",
+    conda:
+        "envs/hp.yml"
+    shell:
+        "python {input.script} {input.data} --plot_styles {plot_styles} --plot_filename {output}"
