@@ -15,7 +15,6 @@ def get_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("fit_filenames", metavar="fit_filename", nargs="+")
     parser.add_argument("--plot_styles", default="styles/paperdraft.mplstyle")
-    parser.add_argument("--operator", default="sym")
     parser.add_argument("--output_filename", default=None)
     return parser.parse_args()
 
@@ -34,6 +33,7 @@ def add_finite_L(ax_row, fit_result, colours):
     time = fit_result["time"]
     flows = get_all_flows(
         [ens["filename"] for ens in fit_result["ensembles"]],
+        operator=fit_result["operator"],
         extra_metadata={"Nc": fit_result["Nc"]},
     )
     x_values = [1 / flow["NX"] ** 4 for flow in flows]
