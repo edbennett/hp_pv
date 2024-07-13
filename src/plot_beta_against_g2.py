@@ -52,7 +52,7 @@ def perturbative_beta(x, n, nf=12):
     )
 
 
-def parse_args():
+def get_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("fit_filenames", nargs="+", metavar="beta_fit_filename")
     parser.add_argument("--plot_filename", default=None)
@@ -129,7 +129,7 @@ def plot(fit_results, filename=None):
 
 
 def main():
-    args = parse_args()
+    args = get_args()
     plt.style.use(args.plot_styles)
     fit_results = read_all_fit_results(args.fit_filenames)
     plot(fit_results, filename=args.plot_filename)

@@ -9,7 +9,7 @@ from provenance import get_consistent_metadata
 from read import read_all_fit_results
 
 
-def parse_args():
+def get_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("input_filenames", metavar="input_filename", nargs="+")
     parser.add_argument("--order", type=int, default=4)
@@ -47,7 +47,7 @@ def describe_inputs(data, **extra_metadata):
 
 
 def main():
-    args = parse_args()
+    args = get_args()
     data = read_all_fit_results(args.input_filenames)
     result = fit_single(data, order=args.order)
     if args.output_filename:
