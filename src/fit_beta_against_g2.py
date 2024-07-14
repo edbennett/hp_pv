@@ -5,7 +5,7 @@ import functools
 
 import pyerrors as pe
 
-from provenance import get_consistent_metadata
+from provenance import describe_inputs
 from read import read_all_fit_results
 
 
@@ -35,15 +35,17 @@ def fit_single(data, order=4):
     return result.fit_parameters
 
 
-def describe_inputs(data, **extra_metadata):
+def get_metadata(data, order):
+    description = "Interpolating form for beta function at finite lattice spacing."
     specific_keys = ["filename", "beta"]
     consistent_keys = ["time", "Nc", "operator"]
-    return {
-        "_description": "Interpolating form for beta function at finite lattice spacing.",
-        "data_sources": [{key: datum[key] for key in specific_keys} for datum in data],
-        **{key: get_consistent_metadata(data, key) for key in consistent_keys},
-        **extra_metadata,
-    }
+    return describe_inputs(
+        data,
+        description,
+        specific_keys,
+        consistent_keys,
+        order=order,
+    )
 
 
 def main():
@@ -54,7 +56,7 @@ def main():
         pe.input.json.dump_dict_to_json(
             {"beta_interpolation": result},
             args.output_filename,
-            description=describe_inputs(data, order=args.order),
+            description=get_metadata(data, args.order),
         )
     else:
         print(f"beta(g^2) interpolation: {result}")

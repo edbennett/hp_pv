@@ -7,7 +7,7 @@ import numpy as np
 import pyerrors as pe
 
 from extrapolate_infinite_volume import get_scales_at_time, linear_fit
-from plots import ColourRegistry, errorbar_pyerrors
+from plots import PlotPropRegistry, errorbar_pyerrors, save_or_show
 from read import get_all_flows, read_all_fit_results
 
 
@@ -32,7 +32,7 @@ def plot_fit(ax, fit_result, xmax, colour=None):
 def add_finite_L(ax_row, fit_result, colours):
     time = fit_result["time"]
     flows = get_all_flows(
-        [ens["filename"] for ens in fit_result["ensembles"]],
+        [ens["filename"] for ens in fit_result["data_sources"]],
         operator=fit_result["operator"],
         extra_metadata={"Nc": fit_result["Nc"]},
     )
@@ -41,9 +41,7 @@ def add_finite_L(ax_row, fit_result, colours):
     betaGF_values = get_scales_at_time(flows, "betaGF", time)
 
     for ax, y_values in zip(ax_row, [gGF2_values, betaGF_values]):
-        errorbar_pyerrors(
-            ax, x_values, y_values, color=colours[time], ls="none", marker="x"
-        )
+        errorbar_pyerrors(ax, x_values, y_values, color=colours[time], marker="x")
 
 
 def add_extrapolation_band(ax_row, fit_result, colours):
@@ -66,9 +64,9 @@ def group_betas(fit_results):
 def plot_g2_vs_L(fit_results, filename=None):
     grouped_results = group_betas(fit_results)
     num_rows = len(grouped_results)
-    colours = ColourRegistry()
+    colours = PlotPropRegistry.colours()
     L_values = set(
-        [ens["NX"] for fit_result in fit_results for ens in fit_result["ensembles"]]
+        [ens["NX"] for fit_result in fit_results for ens in fit_result["data_sources"]]
     )
     times = sorted(set([fit_result["time"] for fit_result in fit_results]))
 
@@ -121,11 +119,7 @@ def plot_g2_vs_L(fit_results, filename=None):
         )
 
     fig.legend(loc="outside lower center", ncols=4)
-    if filename is None:
-        plt.show()
-    else:
-        fig.savefig(filename)
-        plt.close(fig)
+    return fig
 
 
 def main():
@@ -133,7 +127,7 @@ def main():
     plt.style.use(args.plot_styles)
 
     fit_results = read_all_fit_results(args.fit_filenames)
-    plot_g2_vs_L(fit_results, filename=args.output_filename)
+    save_or_show(plot_g2_vs_L(fit_results), args.output_filename)
 
 
 if __name__ == "__main__":

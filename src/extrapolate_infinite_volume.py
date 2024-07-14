@@ -4,7 +4,7 @@ import argparse
 
 import pyerrors as pe
 
-from provenance import get_consistent_metadata
+from provenance import describe_inputs, get_consistent_metadata
 from read import get_all_flows
 from stats import weighted_mean
 from utils import zip_combinations
@@ -51,17 +51,18 @@ def fit_scale(flows, scale, time):
     return weighted_mean(fit_results)
 
 
-def describe_flows(flows, **extra_metadata):
+def get_metadata(flows, operator, time):
+    description = "Infinite volume extrapolation for gradient flow data."
     ensemble_keys = ["filename", "NX", "NY", "NZ", "NT"]
     consistent_keys = ["beta", "Nc"]
-    return {
-        "_description": "Infinite volume extrapolation for gradient flow data.",
-        "ensembles": [
-            {key: ensemble[key] for key in ensemble_keys} for ensemble in flows
-        ],
-        **{key: get_consistent_metadata(flows, key) for key in consistent_keys},
-        **extra_metadata,
-    }
+    return describe_inputs(
+        flows,
+        description,
+        ensemble_keys,
+        consistent_keys,
+        operator=operator,
+        time=time,
+    )
 
 
 def main():
@@ -84,7 +85,7 @@ def main():
         pe.input.json.dump_dict_to_json(
             result,
             args.output_filename,
-            description=describe_flows(flows, operator=args.operator, time=args.time),
+            description=get_metadata(flows, args.operator, args.time),
         )
     else:
         print(f"{args.observable}: {result}")

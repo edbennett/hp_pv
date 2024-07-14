@@ -9,3 +9,12 @@ def get_consistent_metadata(data, key):
         )
 
     return values.pop() if values else None
+
+
+def describe_inputs(data, description, specific_keys, consistent_keys, **extra):
+    return {
+        "_description": description,
+        "data_sources": [{key: datum[key] for key in specific_keys} for datum in data],
+        **{key: get_consistent_metadata(data, key) for key in consistent_keys},
+        **extra,
+    }

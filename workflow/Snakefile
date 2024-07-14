@@ -1,3 +1,5 @@
+import numpy
+
 plot_styles = "styles/paperdraft.mplstyle"
 
 lattice_sizes = [24, 28, 32, 36, 40]
@@ -16,7 +18,8 @@ rule all:
         beta_interpolations=expand(
             "assets/plots/beta_interpolation_finite_a_{operator}.pdf",
             operator=operators,
-        )
+        ),
+        continuum_extrapolation="assets/plots/continuum_extrapolation.pdf",
 
 
 rule extrapolate_infinite_volume:
@@ -80,3 +83,51 @@ rule plot_finite_a_interpolation:
         "envs/hp.yml"
     shell:
         "python {input.script} {input.data} --plot_styles {plot_styles} --plot_filename {output}"
+
+
+continuum_extrapolation_times = {
+    "fit": numpy.arange(3.5, 6.0, 0.2),
+    "unfit": np.concatenate([np.arange(2.5, 3.5, 0.2), np.arange(6.1, 6.8, 0.2)]),
+}
+
+def continuum_extrapolation_sources(wildcards):
+    return [
+        f"intermediary_data/beta_interpolation_t{time}_{{operator}}.json.gz"
+        for time in continuum_extrapolation_times[wildcards.fit_or_unfit]
+    ]
+
+
+rule extrapolate_continuum:
+    input:
+        data=continuum_extrapolation_sources,
+        script="src/extrapolate_continuum.py",
+    output:
+        "intermediary_data/continuum_extrapolation_{operator}_gsquared{g_squared}_{fit_or_unfit}.json.gz",
+    conda:
+        "envs/hp.yml"
+    shell:
+        "python {input.script} {input.data} --g_squared {wildcards.g_squared} --output_filename {output}"
+
+
+continuum_extrapolation_plot_g_squareds = [2.0, 4.0, 6.0, 8.0]
+continuum_extrapolation_plot_tick_times = [2, 2.5, 3.5, 4.5, 6]
+
+rule plot_continuum_extrapolation:
+    input:
+        fit_data=expand(
+            "intermediary_data/continuum_extrapolation_{operator}_gsquared{g_squared}_fit.json.gz",
+            operator=operators,
+            g_squared=continuum_extrapolation_plot_g_squareds,
+        ),
+        unfit_data=expand(
+            "intermediary_data/continuum_extrapolation_{operator}_gsquared{g_squared}_unfit.json.gz",
+            operator=operators,
+            g_squared=continuum_extrapolation_plot_g_squareds,
+        ),
+        script="src/plot_continuum_extrapolation.py",
+    output:
+        "assets/plots/continuum_extrapolation.pdf",
+    conda:
+        "envs/hp.yml"
+    shell:
+        "python {input.script} {input.fit_data} --unfit_filenames {input.unfit_data} --tick_times {continuum_extrapolation_plot_tick_times} --output_file {output}"

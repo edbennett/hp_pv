@@ -4,21 +4,24 @@ import matplotlib.pyplot as plt
 import pyerrors as pe
 
 
-class ColourRegistry:
-    def __init__(self, colours=None):
-        if colours:
-            self._colours = colours
-        else:
-            prop_cycle = plt.rcParams["axes.prop_cycle"]
-            self._colours = prop_cycle.by_key()["color"]
-
-        self._colour_dict = {}
+class PlotPropRegistry:
+    def __init__(self, valid_props):
+        self._potential_props = valid_props
+        self._active_props = {}
 
     def __getitem__(self, key):
-        if key not in self._colour_dict:
-            self._colour_dict[key] = self._colours.pop(0)
+        if key not in self._active_props:
+            self._active_props[key] = self._potential_props.pop(0)
 
-        return self._colour_dict[key]
+        return self._active_props[key]
+
+    def items(self):
+        return self._active_props.items()
+
+    @classmethod
+    def colours(cls):
+        prop_cycle = plt.rcParams["axes.prop_cycle"]
+        return cls(prop_cycle.by_key()["color"])
 
 
 def errorbar_pyerrors(ax, x, y, *args, **kwargs):
@@ -36,4 +39,20 @@ def errorbar_pyerrors(ax, x, y, *args, **kwargs):
         y_values = y
         y_errors = None
 
-    ax.errorbar(x_values, y_values, xerr=x_errors, yerr=y_errors, *args, **kwargs)
+    ax.errorbar(
+        x_values,
+        y_values,
+        xerr=x_errors,
+        yerr=y_errors,
+        ls="none",
+        *args,
+        **kwargs,
+    )
+
+
+def save_or_show(fig, filename=None):
+    if filename is not None:
+        fig.savefig(filename)
+        plt.close(fig)
+    else:
+        plt.show()

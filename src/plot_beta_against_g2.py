@@ -8,7 +8,7 @@ import pandas as pd
 import pyerrors as pe
 
 from fit_beta_against_g2 import interpolating_form
-from plots import ColourRegistry, errorbar_pyerrors
+from plots import PlotPropRegistry, errorbar_pyerrors, save_or_show
 from read import read_all_fit_results
 
 
@@ -77,9 +77,9 @@ def plot_fit(x_values, fit_result, ax, colour=None):
     )
 
 
-def plot(fit_results, filename=None):
-    fig, ax = plt.subplots()
-    colours = ColourRegistry()
+def plot(fit_results):
+    fig, ax = plt.subplots(layout="constrained", figsize=(3.5, 2.5))
+    colours = PlotPropRegistry.colours()
 
     ax.set_xlabel(r"$g_{\mathrm{GF}}^2(t; g_0^2)$")
     ax.set_ylabel(r"$\beta_{\mathrm{GF}}(t; g_0^2)$")
@@ -121,18 +121,14 @@ def plot(fit_results, filename=None):
     ax.set_ylim(-2.4, 0.6)
     ax.legend(loc="best")
 
-    if filename is None:
-        plt.show()
-    else:
-        fig.savefig(filename)
-        plt.close(fig)
+    return fig
 
 
 def main():
     args = get_args()
     plt.style.use(args.plot_styles)
     fit_results = read_all_fit_results(args.fit_filenames)
-    plot(fit_results, filename=args.plot_filename)
+    save_or_show(plot(fit_results), args.plot_filename)
 
 
 if __name__ == "__main__":
