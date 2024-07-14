@@ -8,22 +8,8 @@ import pyerrors as pe
 
 from fit_beta_against_g2 import interpolating_form
 from plots import PlotPropRegistry, errorbar_pyerrors, save_or_show
+from perturbation_theory import add_perturbative_lines
 from read import read_all_fit_results
-
-
-def perturbative_beta(x, n, nf=12):
-    # Eqs. (22), (24) of 1606.03756
-    beta = np.asarray(
-        [
-            11 - 2 * nf / 3,
-            102 - 38 * nf / 3,
-        ]
-    )
-    return -((4 * np.pi) ** 2) * np.sum(
-        (x / (4 * np.pi) ** 2) ** (np.arange(n)[:, np.newaxis] + 2)
-        * beta[:n, np.newaxis],
-        axis=0,
-    )
 
 
 def get_args():
@@ -70,7 +56,6 @@ def plot(fit_results):
             gGF2,
             betaGF,
             label=f"$t / a^2 = {time}$",
-            linestyle="none",
             color=colours[result["time"]],
         )
 
@@ -82,14 +67,7 @@ def plot(fit_results):
         )
 
     _, xmax = ax.get_xlim()
-    analytic_range = np.linspace(0, xmax, 1000)
-    for n_loops, dashes in [(1, (3, 1)), (2, (1, 1))]:
-        ax.plot(
-            analytic_range,
-            perturbative_beta(analytic_range, n_loops),
-            dashes=dashes,
-            color="grey",
-        )
+    add_perturbative_lines(ax, 0, xmax)
 
     ax.set_xlim(0, xmax)
     ax.set_ylim(-2.4, 0.6)

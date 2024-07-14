@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from fit_beta_against_g2 import interpolating_form
+from names import operator_names
 from plots import PlotPropRegistry, errorbar_pyerrors, save_or_show
 from plot_infinite_volume_extrapolation import plot_fit
 from read import read_all_fit_results
@@ -105,7 +106,7 @@ def plot(fit_data, unfit_data, tick_times=[]):
         ax,
         markers,
         attr="marker",
-        mapping={"sym": "WC", "plaq": "WW"}.get,
+        mapping=operator_names.get,
         columns=2,
         position="upper right",
     )

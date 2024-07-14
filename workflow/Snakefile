@@ -1,4 +1,4 @@
-import numpy
+import numpy as np
 
 plot_styles = "styles/paperdraft.mplstyle"
 
@@ -20,6 +20,7 @@ rule all:
             operator=operators,
         ),
         continuum_extrapolation="assets/plots/continuum_extrapolation.pdf",
+        continuum_betafunction="assets/plots/continuum_betafunction.pdf",
 
 
 rule extrapolate_infinite_volume:
@@ -86,7 +87,7 @@ rule plot_finite_a_interpolation:
 
 
 continuum_extrapolation_times = {
-    "fit": numpy.arange(3.5, 6.0, 0.2),
+    "fit": np.arange(3.5, 6.0, 0.2),
     "unfit": np.concatenate([np.arange(2.5, 3.5, 0.2), np.arange(6.1, 6.8, 0.2)]),
 }
 
@@ -130,4 +131,22 @@ rule plot_continuum_extrapolation:
     conda:
         "envs/hp.yml"
     shell:
-        "python {input.script} {input.fit_data} --unfit_filenames {input.unfit_data} --tick_times {continuum_extrapolation_plot_tick_times} --output_file {output}"
+        "python {input.script} {input.fit_data} --unfit_filenames {input.unfit_data} --tick_times {continuum_extrapolation_plot_tick_times} --output_file {output} --plot_styles {plot_styles}"
+
+
+continuum_plot_g_squareds = np.linspace(1.8, 10.4, 86)
+
+rule plot_continuum_beta:
+    input:
+        data=expand(
+            "intermediary_data/continuum_extrapolation_{operator}_gsquared{g_squared}_fit.json.gz",
+            operator=operators,
+            g_squared=continuum_plot_g_squareds,
+        ),
+        script="src/plot_beta_against_g2_continuum.py",
+    output:
+        "assets/plots/continuum_betafunction.pdf",
+    conda:
+        "envs/hp.yml"
+    shell:
+        "python {input.script} {input.data} --plot_filename {output} --plot_styles {plot_styles}"
