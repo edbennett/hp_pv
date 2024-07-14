@@ -4,37 +4,11 @@ import argparse
 
 import matplotlib.pyplot as plt
 import numpy as np
-import pandas as pd
 import pyerrors as pe
 
 from fit_beta_against_g2 import interpolating_form
 from plots import PlotPropRegistry, errorbar_pyerrors, save_or_show
 from read import read_all_fit_results
-
-
-def read_file(filename):
-    read_data = pe.input.json.load_json_dict(filename, verbose=False)
-    parsed_data = []
-    for key, fit_parameters in read_data.items():
-        beta_str, observable, time_str = key.split("|")
-        for param in fit_parameters:
-            param.gamma_method()
-        parsed_data.append(
-            {
-                "beta": float(beta_str),
-                "observable": observable,
-                "time": float(time_str),
-                "continuum": fit_parameters[0],
-                "slope": fit_parameters[1],
-            }
-        )
-
-    df = (
-        pd.DataFrame(parsed_data)
-        .pivot(columns=["observable"], index=["beta", "time"])
-        .reset_index()
-    )
-    return df
 
 
 def perturbative_beta(x, n, nf=12):
