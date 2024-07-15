@@ -3,11 +3,10 @@
 import argparse
 
 import matplotlib.pyplot as plt
-import numpy as np
 
 from fit_beta_against_g2 import interpolating_form
 from names import operator_names
-from plots import PlotPropRegistry, errorbar_pyerrors, save_or_show
+from plots import PlotPropRegistry, errorbar_pyerrors, legend, save_or_show
 from plot_infinite_volume_extrapolation import plot_fit
 from read import read_all_fit_results
 
@@ -49,26 +48,6 @@ def plot_single(ax, fit, use_fit, colours, markers):
     _, xmax = ax.get_xlim()
     if use_fit:
         plot_fit(ax, fit["continuum_extrapolation"], xmax, colour=colour)
-
-
-def legend(ax, entries, attr, mapping, columns, position):
-    handles = []
-    for key, value in entries.items():
-        colour = value if attr == "colour" else "black"
-        marker = value if attr == "marker" else "s"
-        handles.append(
-            ax.errorbar(
-                np.nan,
-                np.nan,
-                yerr=np.nan,
-                ls="none",
-                marker=marker,
-                color=colour,
-                label=mapping(key),
-            )
-        )
-
-    return ax.legend(handles=handles, loc=position, ncols=columns)
 
 
 def plot(fit_data, unfit_data, tick_times=[]):

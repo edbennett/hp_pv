@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import gzip
 import re
 
 from flow_analysis.readers import readers
@@ -8,6 +9,7 @@ from joblib import Memory
 import mpmath
 import numpy as np
 import pyerrors as pe
+import rapidjson as json
 
 from utils import partial_corr_mult
 
@@ -103,14 +105,21 @@ def recurse_gamma(obj):
         obj.gamma_method()
 
 
-def read_fit_result(filename):
-    data = pe.input.json.load_json_dict(filename, verbose=False, full_output=True)
+def read_fit_result(filename, pyerrors=True):
+    if pyerrors:
+        data = pe.input.json.load_json_dict(filename, verbose=False, full_output=True)
+    else:
+        with gzip.open(filename, "r") as f:
+            data = json.load(f)
     data["filename"] = filename
     recurse_gamma(data["obsdata"])
     data.update(data.pop("description"))
     data.update(data.pop("obsdata"))
+    if not pyerrors:
+        data.update(data.pop("description"))
+        data.update(data.pop("OBSDICT"))
     return data
 
 
-def read_all_fit_results(filenames):
-    return [read_fit_result(filename) for filename in filenames]
+def read_all_fit_results(filenames, pyerrors=True):
+    return [read_fit_result(filename, pyerrors=pyerrors) for filename in filenames]

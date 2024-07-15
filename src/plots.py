@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 
 import matplotlib.pyplot as plt
+import numpy as np
 import pyerrors as pe
 
 
 class PlotPropRegistry:
     def __init__(self, valid_props):
-        self._potential_props = valid_props
+        self._potential_props = list(valid_props)
         self._active_props = {}
 
     def __getitem__(self, key):
@@ -48,6 +49,29 @@ def errorbar_pyerrors(ax, x, y, *args, **kwargs):
         *args,
         **kwargs,
     )
+
+
+def legend(ax, entries, attr, mapping, columns, position, fig=None):
+    handles = []
+    for key, value in entries.items():
+        colour = value if attr == "colour" else "black"
+        marker = value if attr == "marker" else "s"
+        handles.append(
+            ax.errorbar(
+                np.nan,
+                np.nan,
+                yerr=np.nan,
+                ls="none",
+                marker=marker,
+                color=colour,
+                label=mapping(key),
+            )
+        )
+
+    if fig is not None:
+        return fig.legend(handles=handles, loc=position, ncols=columns)
+    else:
+        return ax.legend(handles=handles, loc=position, ncols=columns)
 
 
 def save_or_show(fig, filename=None):

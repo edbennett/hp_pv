@@ -19,10 +19,8 @@ def get_args():
 
 
 def get_metadata(data, g_squared):
-    description = (
-        "Interpolating form for continuum limit of beta function at fixed coupling."
-    )
-    specific_keys = ["filename"]
+    description = "Continuum limit of beta function at fixed coupling."
+    specific_keys = ["filename", "time"]
     consistent_keys = ["Nc", "operator"]
     return describe_inputs(
         data,
@@ -30,6 +28,8 @@ def get_metadata(data, g_squared):
         specific_keys,
         consistent_keys,
         g_squared=g_squared,
+        min_time=min(datum["time"] for datum in data),
+        max_time=max(datum["time"] for datum in data),
     )
 
 

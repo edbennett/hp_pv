@@ -21,6 +21,7 @@ rule all:
         ),
         continuum_extrapolation="assets/plots/continuum_extrapolation.pdf",
         continuum_betafunction="assets/plots/continuum_betafunction.pdf",
+        fixed_point_scan="assets/plots/fixed_point_scan.pdf",
 
 
 rule extrapolate_infinite_volume:
@@ -28,7 +29,7 @@ rule extrapolate_infinite_volume:
         data=expand("data/l{NX}t{NX}b{{beta_slug}}.txt", NX=lattice_sizes),
         script="src/extrapolate_infinite_volume.py",
     output:
-        "intermediary_data/infinite_volume_b{beta_slug}_t{time}_{operator}.json.gz",
+        "intermediary_data/infinite_volume/b{beta_slug}_t{time}_{operator}.json.gz",
     conda:
         "envs/hp.yml"
     shell:
@@ -57,12 +58,12 @@ rule plot_volume_extrapolation:
 rule interpolate_finite_a:
     input:
         data=expand(
-            "intermediary_data/infinite_volume_b{beta_slug}_t{{time}}_{{operator}}.json.gz",
+            "intermediary_data/infinite_volume/b{beta_slug}_t{{time}}_{{operator}}.json.gz",
             beta_slug=beta_slugs,
         ),
         script="src/fit_beta_against_g2.py",
     output:
-        "intermediary_data/beta_interpolation_t{time}_{operator}.json.gz",
+        "intermediary_data/beta_interpolation/t{time}_{operator}.json.gz",
     conda:
         "envs/hp.yml"
     shell:
@@ -74,7 +75,7 @@ finite_a_plot_times = volume_plot_times
 rule plot_finite_a_interpolation:
     input:
         data=expand(
-            "intermediary_data/beta_interpolation_t{time}_{{operator}}.json.gz",
+            "intermediary_data/beta_interpolation/t{time}_{{operator}}.json.gz",
             time=finite_a_plot_times,
         ),
         script="src/plot_beta_against_g2.py",
@@ -86,15 +87,10 @@ rule plot_finite_a_interpolation:
         "python {input.script} {input.data} --plot_styles {plot_styles} --plot_filename {output}"
 
 
-continuum_extrapolation_times = {
-    "fit": np.arange(3.5, 6.0, 0.2),
-    "unfit": np.concatenate([np.arange(2.5, 3.5, 0.2), np.arange(6.1, 6.8, 0.2)]),
-}
-
 def continuum_extrapolation_sources(wildcards):
     return [
-        f"intermediary_data/beta_interpolation_t{time}_{{operator}}.json.gz"
-        for time in continuum_extrapolation_times[wildcards.fit_or_unfit]
+        f"intermediary_data/beta_interpolation/t{time:.02f}_{{operator}}.json.gz"
+        for time in np.arange(float(wildcards.tmin), float(wildcards.tmax) + 0.01, float(wildcards.dt))
     ]
 
 
@@ -103,7 +99,7 @@ rule extrapolate_continuum:
         data=continuum_extrapolation_sources,
         script="src/extrapolate_continuum.py",
     output:
-        "intermediary_data/continuum_extrapolation_{operator}_gsquared{g_squared}_{fit_or_unfit}.json.gz",
+        "intermediary_data/continuum_extrapolation/{operator}_gsquared{g_squared}_tmin{tmin}_tmax{tmax}_dt{dt}.json.gz",
     conda:
         "envs/hp.yml"
     shell:
@@ -116,12 +112,12 @@ continuum_extrapolation_plot_tick_times = [2, 2.5, 3.5, 4.5, 6]
 rule plot_continuum_extrapolation:
     input:
         fit_data=expand(
-            "intermediary_data/continuum_extrapolation_{operator}_gsquared{g_squared}_fit.json.gz",
+            "intermediary_data/continuum_extrapolation/{operator}_gsquared{g_squared}_tmin3.5_tmax6.0_dt0.2.json.gz",
             operator=operators,
             g_squared=continuum_extrapolation_plot_g_squareds,
         ),
         unfit_data=expand(
-            "intermediary_data/continuum_extrapolation_{operator}_gsquared{g_squared}_unfit.json.gz",
+            "intermediary_data/continuum_extrapolation/{operator}_gsquared{g_squared}_tmin2.5_tmax6.8_dt0.2.json.gz",
             operator=operators,
             g_squared=continuum_extrapolation_plot_g_squareds,
         ),
@@ -134,18 +130,53 @@ rule plot_continuum_extrapolation:
         "python {input.script} {input.fit_data} --unfit_filenames {input.unfit_data} --tick_times {continuum_extrapolation_plot_tick_times} --output_file {output} --plot_styles {plot_styles}"
 
 
-continuum_plot_g_squareds = np.linspace(1.8, 10.4, 86)
+continuum_plot_g_squareds = np.linspace(1.8, 10.4, 87)
 
 rule plot_continuum_beta:
     input:
         data=expand(
-            "intermediary_data/continuum_extrapolation_{operator}_gsquared{g_squared}_fit.json.gz",
+            "intermediary_data/continuum_extrapolation/{operator}_gsquared{g_squared}_tmin3.5_tmax6.0.json.gz",
             operator=operators,
             g_squared=continuum_plot_g_squareds,
         ),
         script="src/plot_beta_against_g2_continuum.py",
     output:
         "assets/plots/continuum_betafunction.pdf",
+    conda:
+        "envs/hp.yml"
+    shell:
+        "python {input.script} {input.data} --plot_filename {output} --plot_styles {plot_styles}"
+
+
+fixed_point_g_squareds = np.linspace(4.5, 8.5, 41)
+
+
+rule fit_fixed_point:
+    input:
+        data=expand(
+            "intermediary_data/continuum_extrapolation/{{operator}}_gsquared{g_squared}_tmin{{tmin}}_tmax{{tmax}}_dt{{dt}}.json.gz",
+            g_squared=fixed_point_g_squareds,
+        ),
+        script="src/fit_fixed_point.py",
+    output:
+        "intermediary_data/fixed_point/{operator}_tmin{tmin}_tmax{tmax}_dt{dt}.json.gz",
+    conda:
+        "envs/hp.yml"
+    shell:
+        "python {input.script} {input.data} --output_filename {output}"
+
+
+rule plot_fixed_point_scan:
+    input:
+        data=expand(
+            "intermediary_data/fixed_point/{operator}_tmin{tmin}_tmax{tmax}_dt0.1.json.gz",
+            operator=operators,
+            tmin=[3.0, 3.1, 3.2, 3.3, 3.4, 3.5, 3.6, 3.7, 3.8, 3.9, 4.0],
+            tmax=[5.0, 5.5, 6.0],
+        ),
+        script="src/plot_fixed_point_scan.py",
+    output:
+        "assets/plots/fixed_point_scan.pdf",
     conda:
         "envs/hp.yml"
     shell:
