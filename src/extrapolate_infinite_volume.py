@@ -15,7 +15,6 @@ def get_args():
     parser.add_argument("flow_filenames", metavar="flow_filename", nargs="+")
     parser.add_argument("--reader", default="hp")
     parser.add_argument("--operator", default="sym")
-    parser.add_argument("--observable", default="gGF^2")
     parser.add_argument("--output_filename", default=None)
     parser.add_argument("--time", required=True, type=float)
     return parser.parse_args()
@@ -88,7 +87,8 @@ def main():
             description=get_metadata(flows, args.operator, args.time),
         )
     else:
-        print(f"{args.observable}: {result}")
+        for observable, value in result.items():
+            print(f"{observable}: {value}")
 
 
 if __name__ == "__main__":
