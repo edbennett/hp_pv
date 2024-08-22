@@ -35,6 +35,8 @@ def linear_fit(a, x):
 
 def fit_single(x_values, y_values):
     result = pe.fits.least_squares(x_values, y_values, linear_fit, silent=True)
+
+    # Eq. (7) of 2402.18038 to compute AIC weight
     return result, result.chisquare_by_dof + 2 * len(result.fit_parameters)
 
 
