@@ -49,7 +49,7 @@ def plot(beta_continuum):
         )
 
     _, xmax = ax.get_xlim()
-    add_perturbative_lines(ax, 0, xmax)
+    add_perturbative_lines(ax, 0, xmax, "fun", 12, 3)
     ax.set_xlim(0, xmax)
     ax.set_ylim(-0.3, 0.7)
 
