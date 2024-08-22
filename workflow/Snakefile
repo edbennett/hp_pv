@@ -21,6 +21,7 @@ rule all:
         ),
         continuum_extrapolation="assets/plots/continuum_extrapolation.pdf",
         continuum_betafunction="assets/plots/continuum_betafunction.pdf",
+        continuum_betafunction_svg="assets/plots/continuum_betafunction.svg",
         fixed_point_scan="assets/plots/fixed_point_scan.pdf",
 
 
@@ -141,7 +142,7 @@ rule plot_continuum_beta:
         ),
         script="src/plot_beta_against_g2_continuum.py",
     output:
-        "assets/plots/continuum_betafunction.pdf",
+        "assets/plots/continuum_betafunction.{extension}",
     conda:
         "envs/hp.yml"
     shell:
@@ -176,7 +177,7 @@ rule plot_fixed_point_scan:
         ),
         script="src/plot_fixed_point_scan.py",
     output:
-        "assets/plots/fixed_point_scan.pdf",
+        "assets/plots/fixed_point_scan.{extension}",
     conda:
         "envs/hp.yml"
     shell:
