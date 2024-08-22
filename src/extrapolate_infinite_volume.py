@@ -43,6 +43,8 @@ def fit_single(x_values, y_values):
 def fit_scale(flows, scale, time):
     x_values = [1 / flow["NX"] ** 4 for flow in flows]
     scale_values = get_scales_at_time(flows, scale, time)
+    for value in scale_values:
+        value.gamma_method()
     fit_results = [
         fit_single(x_subset, scale_subset)
         for x_subset, scale_subset in zip_combinations(

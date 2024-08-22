@@ -51,6 +51,9 @@ def get_metadata(data, order):
 def main():
     args = get_args()
     data = read_all_fit_results(args.input_filenames)
+    for datum in data:
+        for key in "gGF^2", "betaGF":
+            datum[key][0].gamma_method()
     result = fit_single(data, order=args.order)
     if args.output_filename:
         pe.input.json.dump_dict_to_json(

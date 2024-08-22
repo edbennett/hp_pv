@@ -72,6 +72,8 @@ def main():
     args = get_args()
     data = read_all_fit_results(args.input_filenames)
     g_star_squared, gamma_star = fit(data)
+    for datum in data:
+        datum["continuum_extrapolation"][0].gamma_method()
     if args.output_filename:
         pe.input.json.dump_dict_to_json(
             {
