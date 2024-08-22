@@ -1,0 +1,27 @@
+# This CITATION.cff file was generated with cffinit.
+# Visit https://bit.ly/cffinit to generate yours today!
+
+cff-version: 1.2.0
+title: >-
+  Alternative analysis workflow for “Twelve flavor SU(3)
+  gradient flow data for the continuous beta-function”
+message: >-
+  If you use this software, please cite it using the
+  metadata from this file.
+type: software
+authors:
+  - given-names: Ed
+    family-names: Bennett
+    email: e.j.bennett@swansea.ac.uk
+    affiliation: Swansea University
+    orcid: 'https://orcid.org/0000-0002-1678-6701'
+identifiers:
+  - type: doi
+    value: 10.5281/zenodo.13362605
+    description: Zenodo DOI
+repository-code: 'https://github.com/edbennett/hp_pv'
+abstract: >
+  This workflow analyses the open data released by Anna
+  Hasenfratz and Curtis Peterson to reproduce their findings
+  published in arXiv:2402.18038 (Phys.Rev.D 109 (2024) 11,
+  114507).
