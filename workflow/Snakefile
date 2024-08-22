@@ -136,7 +136,7 @@ continuum_plot_g_squareds = np.linspace(1.8, 10.4, 87)
 rule plot_continuum_beta:
     input:
         data=expand(
-            "intermediary_data/continuum_extrapolation/{operator}_gsquared{g_squared}_tmin3.5_tmax6.0.json.gz",
+            "intermediary_data/continuum_extrapolation/{operator}_gsquared{g_squared}_tmin3.5_tmax6.0_dt0.2.json.gz",
             operator=operators,
             g_squared=continuum_plot_g_squareds,
         ),
