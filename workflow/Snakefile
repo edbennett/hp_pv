@@ -43,7 +43,7 @@ volume_plot_times = [2.5, 3.5, 4.5, 6.0]
 rule plot_volume_extrapolation:
     input:
         data=expand(
-            "intermediary_data/infinite_volume_b{beta_slug}_t{time}_{{operator}}.json.gz",
+            "intermediary_data/infinite_volume/b{beta_slug}_t{time}_{{operator}}.json.gz",
             beta_slug=volume_plot_beta_slugs,
             time=volume_plot_times,
         ),
