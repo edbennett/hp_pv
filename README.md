@@ -14,12 +14,12 @@ to reproduce their findings published in [arXiv:2402.18038][arxiv]
 ## Setup
 
 1. Install the dependencies above.
-2. Clone this repository
-   (or download and `unzip` it)
+2. Clone this repository including submodules
+   (or download its Zenodo release and `unzip` it)
    and `cd` into it:
 
    ```shellsession
-   git clone https://github.com/edbennett/hp_pv
+   git clone --recurse-submodules https://github.com/edbennett/hp_pv
    cd hp_pv
    ```
 
