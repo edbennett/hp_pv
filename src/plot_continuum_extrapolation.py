@@ -6,8 +6,8 @@ import matplotlib.pyplot as plt
 
 from fit_beta_against_g2 import interpolating_form
 from names import operator_names
-from plots import PlotPropRegistry, errorbar_pyerrors, legend, save_or_show
 from plot_infinite_volume_extrapolation import plot_fit
+from plots import PlotPropRegistry, errorbar_pyerrors, legend, save_or_show
 from read import read_all_fit_results
 
 
