@@ -7,8 +7,8 @@ import numpy as np
 import pyerrors as pe
 
 from fit_beta_against_g2 import interpolating_form
-from plots import PlotPropRegistry, errorbar_pyerrors, save_or_show
 from perturbation_theory import add_perturbative_lines
+from plots import PlotPropRegistry, errorbar_pyerrors, save_or_show
 from read import read_all_fit_results
 
 
