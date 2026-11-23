@@ -5,8 +5,8 @@ import argparse
 import matplotlib.pyplot as plt
 
 from names import operator_names
-from plots import save_or_show
 from perturbation_theory import add_perturbative_lines
+from plots import save_or_show
 from read import read_all_fit_results
 
 
